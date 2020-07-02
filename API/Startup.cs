@@ -28,9 +28,18 @@ namespace API
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+            services.AddRouting();
+            services.AddAuthorization();
             services.AddDbContext<DataContext>(opt =>
             {
                 opt.UseSqlite(Configuration.GetConnectionString("DefaultConnection"));
+            });
+            services.AddCors(opt =>
+            {
+                opt.AddPolicy("CorsPolicy", policy =>
+                {
+                    policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:3000");
+                });
             });
         }
 
@@ -45,6 +54,8 @@ namespace API
             // app.UseHttpsRedirection();
 
             app.UseRouting();
+            //cors has to come after routing but before authorization
+            app.UseCors("CorsPolicy");
 
             app.UseAuthorization();
 
@@ -52,6 +63,8 @@ namespace API
             {
                 endpoints.MapControllers();
             });
+
+
         }
     }
 }
